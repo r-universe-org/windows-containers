@@ -1,0 +1,25 @@
+name: Docker for Windows
+
+on:
+  push: {}
+  workflow_dispatch:
+    inputs: {}
+
+jobs:
+  docker:
+    runs-on: windows-2019
+    continue-on-error: true
+    timeout-minutes: 60
+    name: Build for R-${{ matrix.r }}
+    strategy:
+      fail-fast: false
+      matrix:
+        r: [ '3.6', '4.0']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Test docker build
+        run: |
+          cd R-${{ matrix.r }}
+          docker build .

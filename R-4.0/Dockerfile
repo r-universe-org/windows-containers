@@ -2,8 +2,8 @@ FROM mcr.microsoft.com/windows/servercore:ltsc2019
 
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
 
-ENV R_VERSION 3.6.3
-ENV RTOOLS Rtools35.exe
+ENV R_VERSION 4.0.3
+ENV RTOOLS rtools40-x86_64.exe
 
 WORKDIR /
 
@@ -17,7 +17,7 @@ RUN Write-Debug [Net.ServicePointManager]::SecurityProtocol ;\
     Invoke-WebRequest https://cran.r-project.org/bin/windows/Rtools/$env:RTOOLS -OutFile .\Rtools-installer.exe; \
     Start-Process .\Rtools-installer.exe -ArgumentList '/VERYSILENT' -Wait ; \
     Remove-Item .\Rtools-installer.exe -Force ; \
-    $rPath = 'C:\R\bin;C:\Rtools\bin;C:\Rtools\mingw_64\bin' ; \
+    $rPath = 'C:\R\bin;C:\rtools40\usr\bin;C:\rtools40\mingw64\bin' ; \
     $newPath = ('{0};{1}' -f $rPath, $Env:PATH); \
     setx /M PATH $newPath; \
     Add-Content c:\R\etc\Rprofile.site 'options(repos = c(CRAN = \"https://cloud.r-project.org/\"))'
