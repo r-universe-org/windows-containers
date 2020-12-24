@@ -1,4 +1,4 @@
-name: Docker for Windows
+name: R for Windows Container Images
 
 on:
   push: {}
@@ -10,16 +10,28 @@ jobs:
     runs-on: windows-2019
     continue-on-error: true
     timeout-minutes: 60
-    name: Build for R-${{ matrix.r }}
+    name: Build for R-${{ matrix.config.r }}
     strategy:
       fail-fast: false
       matrix:
-        r: [ '3.6', '4.0']
+        config:
+          - {version: oldrel, r: '4.0'}
+          - {version: release, r: '3.6'}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Test docker build
+      - name: Build image
         run: |
-          cd R-${{ matrix.r }}
-          docker build .
+          docker build --tag r-windows:${{ matrix.config.r }} --file R-${{ matrix.config.r }}/Dockerfile
+
+      - name: Tag image for r-universe
+        run: |
+          echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+          docker tag r-windows:${{ matrix.config.r }} runiverse/r-windows:${{ matrix.config.version }}
+          docker tag r-windows:${{ matrix.config.r }} runiverse/r-windows:${{ matrix.config.r }}
+          docker push runiverse/r-windows:${{ matrix.config.version }}
+          docker push runiverse/r-windows:${{ matrix.config.r }}
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
