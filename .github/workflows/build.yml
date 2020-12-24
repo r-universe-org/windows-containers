@@ -1,0 +1,39 @@
+name: R for Windows Container Images
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - '.github/build.yml'
+  workflow_dispatch:
+
+jobs:
+  docker:
+    runs-on: windows-2019
+#    continue-on-error: true
+    timeout-minutes: 60
+    name: Build for R-${{ matrix.config.r }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {version: oldrel, r: '4.0'}
+          - {version: release, r: '3.6'}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Build image
+        run: |
+          docker build --tag r-windows:${{ matrix.config.r }} --file R-${{ matrix.config.r }}/Dockerfile .
+      - name: Tag image for r-universe
+        run: |
+          docker login -u ${env:DOCKER_USERNAME} -p ${env:DOCKER_PASSWORD}
+          docker tag r-windows:${{ matrix.config.r }} runiverse/r-windows:${{ matrix.config.version }}
+          docker tag r-windows:${{ matrix.config.r }} runiverse/r-windows:${{ matrix.config.r }}
+          docker push runiverse/r-windows:${{ matrix.config.version }}
+          docker push runiverse/r-windows:${{ matrix.config.r }}
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}

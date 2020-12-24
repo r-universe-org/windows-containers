@@ -8,29 +8,14 @@ on:
 jobs:
   docker:
     runs-on: windows-2019
-#    continue-on-error: true
     timeout-minutes: 60
-    name: Build for R-${{ matrix.config.r }}
+    name: Test for R-${{ matrix.r }}
     strategy:
       fail-fast: false
       matrix:
-        config:
-          - {version: oldrel, r: '4.0'}
-          - {version: release, r: '3.6'}
+        r: [ 'release', 'oldrel']
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Build image
+      - name: Download image r-windows:${{ matrix.r }}
         run: |
-          docker build --tag r-windows:${{ matrix.config.r }} --file R-${{ matrix.config.r }}/Dockerfile .
-      - name: Tag image for r-universe
-        run: |
-          docker login -u ${env:DOCKER_USERNAME} -p ${env:DOCKER_PASSWORD}
-          docker tag r-windows:${{ matrix.config.r }} runiverse/r-windows:${{ matrix.config.version }}
-          docker tag r-windows:${{ matrix.config.r }} runiverse/r-windows:${{ matrix.config.r }}
-          docker push runiverse/r-windows:${{ matrix.config.version }}
-          docker push runiverse/r-windows:${{ matrix.config.r }}
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          docker run runiverse/r-windows:${{ matrix.r }} R -e "sessionInfo()"
