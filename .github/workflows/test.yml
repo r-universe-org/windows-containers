@@ -8,7 +8,7 @@ on:
 jobs:
   docker:
     runs-on: windows-2019
-    continue-on-error: true
+#    continue-on-error: true
     timeout-minutes: 60
     name: Build for R-${{ matrix.config.r }}
     strategy:
@@ -24,10 +24,9 @@ jobs:
       - name: Build image
         run: |
           docker build --tag r-windows:${{ matrix.config.r }} --file R-${{ matrix.config.r }}/Dockerfile .
-
       - name: Tag image for r-universe
         run: |
-          echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+          docker login -u ${env:DOCKER_USERNAME} -p ${env:DOCKER_PASSWORD}
           docker tag r-windows:${{ matrix.config.r }} runiverse/r-windows:${{ matrix.config.version }}
           docker tag r-windows:${{ matrix.config.r }} runiverse/r-windows:${{ matrix.config.r }}
           docker push runiverse/r-windows:${{ matrix.config.version }}
