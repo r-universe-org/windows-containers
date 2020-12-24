@@ -5,7 +5,7 @@ on:
     branches:
       - master
     paths:
-      - '.github/build.yml'
+      - '.github/workflows/build.yml'
   workflow_dispatch:
 
 jobs:
@@ -37,3 +37,13 @@ jobs:
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Push to GitHub Packages
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: docker.pkg.github.com
+          repository: r-universe-org/windows-containers/r-windows
+          tags: |
+            r-windows:${{ matrix.config.r }}
+            r-windows:${{ matrix.config.r }}

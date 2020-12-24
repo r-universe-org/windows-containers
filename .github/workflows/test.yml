@@ -17,5 +17,6 @@ jobs:
 
     steps:
       - name: Download image r-windows:${{ matrix.r }}
-        run: |
-          docker run runiverse/r-windows:${{ matrix.r }} R -e "sessionInfo()"
+        run: docker pull runiverse/r-windows:${{ matrix.r }}
+      - name: Run test command
+        run: docker run runiverse/r-windows:${{ matrix.r }} R -e "sessionInfo()"
